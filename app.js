@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
-const router = require('./src/routes');
+const router = require('./routes');
 
 const { CONNECT_ADDRESS = 'mongodb://127.0.0.1:27017/bitfilmsbd', PORT = 3000 } = process.env;
 
