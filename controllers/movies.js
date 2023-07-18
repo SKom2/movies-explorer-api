@@ -4,15 +4,25 @@ const NotFoundError = require('../errors/not-found-err');
 const ForbiddenErr = require('../errors/forbidden-err');
 const mongoose = require("mongoose");
 const BadRequest = require("../errors/bad-request-err");
-const {WRONG_CREATE_MOVIE_DATA, MOVIE_ID_NOT_FOUND, ACCESS_ERROR, WRONG_DELETE_MOVIE_DATA} = require("../constants/ErrorMessages");
+const {WRONG_CREATE_MOVIE_DATA, MOVIE_ID_NOT_FOUND, ACCESS_ERROR, WRONG_DELETE_MOVIE_DATA, WRONG_USER_DATA,
+  UNAUTHORIZED_USER
+} = require("../constants/ErrorMessages");
+const Unauthorized = require("../errors/unauthorized-err");
 
-const getMovies = (req, res, next) => Movie.find({ owner: { $exists: true } })
-  .then((movie) => {
-    res.status(SUCCESS).send(movie);
-  })
-  .catch(next);
+const getMovies = (req, res, next) => {
+  if (!req.user) {
+    next(new Unauthorized(UNAUTHORIZED_USER));
+  }
+
+  Movie.find({ owner: req.user._id })
+    .then((movies) => {
+      res.status(SUCCESS).send(movies);
+    })
+    .catch(next);
+};
 
 const createMovie = (req, res, next) => Movie.create({
+  owner: req.user._id,
   ...req.body
 })
   .then((movie) => {
