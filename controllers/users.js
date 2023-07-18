@@ -8,6 +8,8 @@ const {
 const ConflictError = require('../errors/conflict-error');
 const BadRequest = require('../errors/bad-request-err');
 const Unauthorized = require('../errors/unauthorized-err');
+const {EMAIL_ALREADY_EXISTS, WRONG_USER_DATA, USER_ID_NOT_FOUND, WRONG_USER_EMAIL, UNAUTHORIZED_USER} = require("../constants/ErrorMessages");
+const NotFoundError = require("../errors/not-found-err");
 
 const SALT_ROUNDS = 10;
 const { SECRET_KEY = 'some-secret-key' } = process.env;
@@ -27,9 +29,9 @@ const createUser = (req, res, next) => {
       })
       .catch((err) => {
         if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
-          next(new ConflictError('This user already exists'));
+          next(new ConflictError(EMAIL_ALREADY_EXISTS));
         } else if (err instanceof mongoose.Error.ValidationError) {
-          next(new BadRequest('Incorrect data sent'));
+          next(new BadRequest(WRONG_USER_DATA));
         } else {
           next(err);
         }
@@ -48,8 +50,8 @@ const loginUser = (req, res, next) => {
       );
       res.status(SUCCESS).send({ token });
     })
-    .catch((err) => {
-      next(new Unauthorized(err.message));
+    .catch(() => {
+        next(new Unauthorized(WRONG_USER_DATA));
     });
 };
 
@@ -75,9 +77,14 @@ const updateUser = (req, res, next) => {
       res.status(SUCCESS).send(user);
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequest('Invalid User Id'));
-      } else {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequest(WRONG_USER_EMAIL));
+      } else if (err instanceof mongoose.Error.CastError) {
+        next(new BadRequest(USER_ID_NOT_FOUND));
+      } else if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
+        next(new ConflictError(EMAIL_ALREADY_EXISTS));
+      }
+      else {
         next(err);
       }
     });

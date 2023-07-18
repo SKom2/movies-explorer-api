@@ -1,4 +1,4 @@
-const router = require('express').Router();
+const express = require("express");
 const userController = require('../controllers/users');
 const userRouter = require('./users');
 const movieRouter = require('./movies');
@@ -6,6 +6,9 @@ const auth = require('../middlewares/auth');
 const NotFoundError = require('../errors/not-found-err');
 const { requestLogger, errorLogger } = require('../middlewares/logger');
 const { validateUserRegisterBody, validateUserLoginBody } = require('../middlewares/validate');
+const {PAGE_NOT_FOUND} = require("../constants/ErrorMessages");
+
+const router = express.Router()
 
 router.use(requestLogger);
 
@@ -18,7 +21,7 @@ router.use('/users', userRouter);
 router.use('/movies', movieRouter);
 
 router.use((req, res, next) => {
-  next(new NotFoundError('The requested page was not found'));
+  next(new NotFoundError(PAGE_NOT_FOUND));
 });
 
 router.use(errorLogger);

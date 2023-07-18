@@ -2,13 +2,19 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
+const helmet = require('helmet');
 const router = require('./routes');
+const errorHandler = require("./middlewares/errorHandler");
+const {CONNECT_ADDRESS} = require("./constants/Config");
+const limiter = require("./middlewares/limiter");
 
-const { CONNECT_ADDRESS = 'mongodb://127.0.0.1:27017/bitfilmsbd', PORT = 3000 } = process.env;
+const { PORT = 3000 } = process.env;
 
 const app = express();
 mongoose.set('toJSON', { useProjection: true });
 mongoose.connect(CONNECT_ADDRESS);
+app.use(helmet());
+app.use(limiter)
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -31,27 +37,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// eslint-disable-next-line no-unused-vars
 app.use(express.json());
 app.use(router);
 app.use(errors());
-
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  // eslint-disable-next-line no-console
-  console.error(`Error occurred: ${err}`);
-  // eslint-disable-next-line no-console
-  console.error(err.stack);
-
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'An error occurred on the server'
-        : message
-    });
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
