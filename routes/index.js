@@ -14,6 +14,8 @@ router.use(requestLogger);
 
 router.use('/signup', validateUserRegisterBody, userController.createUser);
 router.use('/signin', validateUserLoginBody, userController.loginUser);
+router.get('/signout', userController.logoutUser);
+
 
 router.use(auth);
 

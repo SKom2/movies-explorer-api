@@ -8,7 +8,7 @@ const {
 const ConflictError = require('../errors/conflict-error');
 const BadRequest = require('../errors/bad-request-err');
 const Unauthorized = require('../errors/unauthorized-err');
-const {EMAIL_ALREADY_EXISTS, WRONG_USER_DATA, USER_ID_NOT_FOUND, WRONG_USER_EMAIL, UNAUTHORIZED_USER} = require("../constants/ErrorMessages");
+const {EMAIL_ALREADY_EXISTS, WRONG_USER_DATA, USER_ID_NOT_FOUND, WRONG_USER_EMAIL, UNAUTHORIZED_USER, USER_LOGGED_OUT} = require("../constants/ErrorMessages");
 const NotFoundError = require("../errors/not-found-err");
 
 const SALT_ROUNDS = 10;
@@ -48,12 +48,23 @@ const loginUser = (req, res, next) => {
         SECRET_KEY,
         { expiresIn: '7d' }
       );
+
+      res.cookie('jwt', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
       res.status(SUCCESS).send({ token });
     })
     .catch(() => {
-        next(new Unauthorized(WRONG_USER_DATA));
+      next(new Unauthorized(WRONG_USER_DATA));
     });
 };
+
+const logoutUser = (req, res) => {
+  res.clearCookie('jwt');
+  res.status(SUCCESS).send({ message: USER_LOGGED_OUT });
+}
 
 const getUser = (req, res, next) => {
   const currentUserId = req.user._id;
@@ -93,6 +104,7 @@ const updateUser = (req, res, next) => {
 module.exports = {
   createUser,
   loginUser,
+  logoutUser,
   getUser,
   updateUser
 };
