@@ -45,7 +45,7 @@ const validateMovieBody = celebrate({
     year: Joi.string().required(),
     description: Joi.string().required(),
     image: Joi.string().required().custom((value, helpers) => {
-      if (!/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.test(value)) {
+      if (!/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|jpeg)/.test(value)) {
         return helpers.error('any.invalid');
       }
       return value;
@@ -57,7 +57,7 @@ const validateMovieBody = celebrate({
       return value;
     }),
     thumbnail: Joi.string().required().custom((value, helpers) => {
-      if (!/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.test(value)) {
+      if (!/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|jpeg)/.test(value)) {
         return helpers.error('any.invalid');
       }
       return value;
