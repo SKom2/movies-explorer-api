@@ -26,7 +26,7 @@ const moviesSchema = mongoose.Schema({
     required: true,
     validate: {
       validator(value) {
-        return /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.test(value);
+        return /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|jpeg)/.test(value);
       }
     }
   },
@@ -44,7 +44,7 @@ const moviesSchema = mongoose.Schema({
     required: true,
     validate: {
       validator(value) {
-        return /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.test(value);
+        return /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|jpeg)/.test(value);
       }
     }
   },
