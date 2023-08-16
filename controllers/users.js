@@ -9,7 +9,6 @@ const ConflictError = require('../errors/conflict-error');
 const BadRequest = require('../errors/bad-request-err');
 const Unauthorized = require('../errors/unauthorized-err');
 const {EMAIL_ALREADY_EXISTS, WRONG_USER_DATA, USER_ID_NOT_FOUND, WRONG_USER_EMAIL, UNAUTHORIZED_USER, USER_LOGGED_OUT} = require("../constants/ErrorMessages");
-const NotFoundError = require("../errors/not-found-err");
 
 const SALT_ROUNDS = 10;
 const { SECRET_KEY = 'some-secret-key' } = process.env;
@@ -25,7 +24,21 @@ const createUser = (req, res, next) => {
       name
     })
       .then((user) => {
-        res.status(CREATE).send(user);
+        const token = jwt.sign(
+          { _id: user._id },
+          SECRET_KEY,
+          { expiresIn: '7d' }
+        );
+
+        res.cookie('jwt', token, {
+          httpOnly: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(CREATE).send({
+          user,
+          token
+        });
       })
       .catch((err) => {
         if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
