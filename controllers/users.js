@@ -67,7 +67,10 @@ const loginUser = (req, res, next) => {
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
-      res.status(SUCCESS).send({ token });
+      res.status(SUCCESS).send({
+        token,
+        logged: true
+      });
     })
     .catch(() => {
       next(new Unauthorized(WRONG_USER_DATA));
